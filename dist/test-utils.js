@@ -1,35 +1,15 @@
-# GraphQL Schema to JSON Schema
-
-
-### Input
-
-```graphql
-type Todo {
-    id: String!
-    name: String!
-    completed: Boolean
-}
-
-input TodoInputType {
-    name: String!
-    completed: Boolean
-}
-
-type Query {
-    todo(id: String!): Todo
-    todos: [Todo]
-}
-
-type Mutation {
-    update_todo(id: String!, todo: TodoInputType!): Todo
-    create_todo(todo: TodoInputType!): Todo
-}
-```
-
-### Output
-
-```js
-{
+"use strict";
+exports.__esModule = true;
+var graphql_1 = require("graphql");
+exports.getTodoSchemaIntrospection = function () {
+    var schema = graphql_1.buildSchema("\n        type Todo {\n            id: String!\n            name: String!\n            completed: Boolean\n        }\n\n        input TodoInputType {\n            name: String!\n            completed: Boolean\n        }\n\n        type Query {\n            todo(id: String!): Todo!\n            todos: [Todo!]!\n        }\n\n        type Mutation {\n            update_todo(id: String!, todo: TodoInputType!): Todo\n            create_todo(todo: TodoInputType!): Todo\n        }\n");
+    var result = graphql_1.graphqlSync(schema, graphql_1.introspectionQuery);
+    return {
+        introspection: result.data,
+        schema: schema
+    };
+};
+exports.todoSchemaAsJsonSchema = {
     $schema: 'http://json-schema.org/draft-06/schema#',
     properties: {
         Query: {
@@ -45,7 +25,7 @@ type Mutation {
                             },
                             required: ['id']
                         },
-                        return: {
+                        "return": {
                             $ref: '#/definitions/Todo'
                         }
                     },
@@ -59,7 +39,7 @@ type Mutation {
                             properties: {},
                             required: []
                         },
-                        return: {
+                        "return": {
                             type: 'array',
                             items: { $ref: '#/definitions/Todo' }
                         }
@@ -83,7 +63,7 @@ type Mutation {
                             },
                             required: ['id', 'todo']
                         },
-                        return: {
+                        "return": {
                             $ref: '#/definitions/Todo'
                         }
                     },
@@ -99,14 +79,14 @@ type Mutation {
                             },
                             required: ['todo']
                         },
-                        return: {
+                        "return": {
                             $ref: '#/definitions/Todo'
                         }
                     },
                     required: []
                 }
             }
-        },
+        }
     },
     definitions: {
         'Todo': {
@@ -114,7 +94,7 @@ type Mutation {
             properties: {
                 id: { type: 'string' },
                 name: { type: 'string' },
-                completed: { type: 'boolean' },
+                completed: { type: 'boolean' }
             },
             required: ['id', 'name']
         },
@@ -122,10 +102,9 @@ type Mutation {
             type: 'object',
             properties: {
                 name: { type: 'string' },
-                completed: { type: 'boolean' },
+                completed: { type: 'boolean' }
             },
             required: ['name']
         }
     }
-}
-```
+};

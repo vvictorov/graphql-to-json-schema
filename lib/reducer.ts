@@ -9,7 +9,8 @@ import {
     isIntrospectionInputValue,
     isIntrospectionListTypeRef,
     isIntrospectionObjectType,
-    isNonNullIntrospectionType
+    isNonNullIntrospectionType,
+    isIntrospectionEnumType
 } from './typeGuards';
 import { graphqlToJSONType, typesMapping } from './typesMapping';
 
@@ -17,7 +18,6 @@ export type JSONSchema6Acc = {
     [k: string]: boolean | JSONSchema6;
 };
 
-// Extract GraphQL no-nullable types
 type GetRequiredFieldsType = ReadonlyArray<IntrospectionInputValue | IntrospectionField>;
 export const getRequiredFields = (fields: GetRequiredFieldsType) => map(
     filter(
@@ -29,7 +29,6 @@ export const getRequiredFields = (fields: GetRequiredFieldsType) => map(
 
 export type IntrospectionFieldReducerItem = IntrospectionField | IntrospectionInputValue;
 
-// reducer for a queries/mutations
 export const propertiesIntrospectionFieldReducer:
     MemoListIterator<IntrospectionFieldReducerItem, JSONSchema6Acc, ReadonlyArray<IntrospectionFieldReducerItem>> =
     (acc, curr: IntrospectionFieldReducerItem): JSONSchema6Acc => {
@@ -62,7 +61,6 @@ export const propertiesIntrospectionFieldReducer:
         return acc;
     };
 
-// reducer for a custom types
 export const definitionsIntrospectionFieldReducer:
     MemoListIterator<IntrospectionFieldReducerItem, JSONSchema6Acc, ReadonlyArray<IntrospectionFieldReducerItem>> =
     (acc, curr: IntrospectionFieldReducerItem): JSONSchema6Acc => {
@@ -82,7 +80,6 @@ export const definitionsIntrospectionFieldReducer:
         return acc;
     };
 
-// Reducer for each type exposed by the GraphQL Schema
 export const introspectionTypeReducer:
     (type: 'definitions' | 'properties') => MemoListIterator<IntrospectionType, JSONSchema6Acc, IntrospectionType[]> =
     type => (acc, curr: IntrospectionType): JSONSchema6Acc => {
@@ -96,7 +93,6 @@ export const introspectionTypeReducer:
                 properties: reduce<IntrospectionFieldReducerItem, JSONSchema6Acc>(
                     curr.fields as IntrospectionFieldReducerItem[], fieldReducer, {}
                 ),
-                // ignore required for Mutations/Queries
                 required: type === 'definitions' ? getRequiredFields(curr.fields) : []
             };
         } else if (isIntrospectionInputObjectType(curr)) {
@@ -106,6 +102,14 @@ export const introspectionTypeReducer:
                     curr.inputFields as IntrospectionFieldReducerItem[], fieldReducer, {}
                 ),
                 required: getRequiredFields(curr.inputFields)
+            };
+        } else if (isIntrospectionEnumType(curr)) {
+            acc[curr.name] = {
+                type: 'enum',
+                properties: reduce<IntrospectionFieldReducerItem, JSONSchema6Acc>(
+                    curr.fields as IntrospectionFieldReducerItem[], fieldReducer, {}
+                ),
+                required: type === 'definitions' ? getRequiredFields(curr.fields) : []
             };
         }
         return acc;
