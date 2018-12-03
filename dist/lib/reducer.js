@@ -64,7 +64,9 @@ exports.introspectionTypeReducer = function (type) { return function (acc, curr)
         };
     } else if (typeGuards_1.isIntrospectionEnumType(curr)) {
       acc[curr.name] = {
-        type: 'enum',
+        type: 'string',
+        enum: curr.enumValues.map(item => item.name),
+        enumNames: curr.enumValues.map(item => item.description),
         properties: lodash_1.reduce(curr.fields, fieldReducer, {}),
         required: type === 'definitions' ? exports.getRequiredFields(curr.fields) : []
       };
