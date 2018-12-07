@@ -7,8 +7,8 @@ exports.getRequiredFields = function (fields) { return lodash_1.map(lodash_1.fil
 exports.propertiesIntrospectionFieldReducer = function (acc, curr) {
     if (typeGuards_1.isIntrospectionField(curr)) {
         var returnType = typeGuards_1.isNonNullIntrospectionType(curr.type) ?
-            typesMapping_1.graphqlToJSONType(curr.type.ofType) :
-            typesMapping_1.graphqlToJSONType(curr.type);
+          {...typesMapping_1.graphqlToJSONType(curr.type.ofType), description: curr.description} :
+          {...typesMapping_1.graphqlToJSONType(curr.type), description: curr.description};
         acc[curr.name] = {
             type: 'object',
             properties: {
@@ -24,8 +24,8 @@ exports.propertiesIntrospectionFieldReducer = function (acc, curr) {
     }
     else if (typeGuards_1.isIntrospectionInputValue(curr)) {
         var returnType = typeGuards_1.isNonNullIntrospectionType(curr.type) ?
-            typesMapping_1.graphqlToJSONType(curr.type.ofType) :
-            typesMapping_1.graphqlToJSONType(curr.type);
+          {...typesMapping_1.graphqlToJSONType(curr.type.ofType), description: curr.description} :
+          {...typesMapping_1.graphqlToJSONType(curr.type), description: curr.description};
         acc[curr.name] = returnType;
     }
     return acc;
@@ -33,14 +33,14 @@ exports.propertiesIntrospectionFieldReducer = function (acc, curr) {
 exports.definitionsIntrospectionFieldReducer = function (acc, curr) {
     if (typeGuards_1.isIntrospectionField(curr)) {
         var returnType = typeGuards_1.isNonNullIntrospectionType(curr.type) ?
-            typesMapping_1.graphqlToJSONType(curr.type.ofType) :
-            typesMapping_1.graphqlToJSONType(curr.type);
+          {...typesMapping_1.graphqlToJSONType(curr.type.ofType), description: curr.description} :
+          {...typesMapping_1.graphqlToJSONType(curr.type), description: curr.description};
         acc[curr.name] = returnType;
     }
     else if (typeGuards_1.isIntrospectionInputValue(curr)) {
         var returnType = typeGuards_1.isNonNullIntrospectionType(curr.type) ?
-            typesMapping_1.graphqlToJSONType(curr.type.ofType) :
-            typesMapping_1.graphqlToJSONType(curr.type);
+          {...typesMapping_1.graphqlToJSONType(curr.type.ofType), description: curr.description} :
+          {...typesMapping_1.graphqlToJSONType(curr.type), description: curr.description};
         acc[curr.name] = returnType;
     }
     return acc;
@@ -52,6 +52,7 @@ exports.introspectionTypeReducer = function (type) { return function (acc, curr)
     if (typeGuards_1.isIntrospectionObjectType(curr)) {
         acc[curr.name] = {
             type: 'object',
+            description: curr.description,
             properties: lodash_1.reduce(curr.fields, fieldReducer, {}),
             required: type === 'definitions' ? exports.getRequiredFields(curr.fields) : []
         };
@@ -59,12 +60,14 @@ exports.introspectionTypeReducer = function (type) { return function (acc, curr)
     else if (typeGuards_1.isIntrospectionInputObjectType(curr)) {
         acc[curr.name] = {
             type: 'object',
+            description: curr.description,
             properties: lodash_1.reduce(curr.inputFields, fieldReducer, {}),
             required: exports.getRequiredFields(curr.inputFields)
         };
     } else if (typeGuards_1.isIntrospectionEnumType(curr)) {
       acc[curr.name] = {
         type: 'string',
+        description: curr.description,
         enum: curr.enumValues.map(item => item.name),
         enumNames: curr.enumValues.map(item => item.description),
         properties: lodash_1.reduce(curr.fields, fieldReducer, {}),
